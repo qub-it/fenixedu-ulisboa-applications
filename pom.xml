@@ -12,7 +12,7 @@
 
 	<groupId>org.fenixedu</groupId>
 	<artifactId>fenixedu-ulisboa-applications</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>FenixEdu ULisboa Applications</name>
