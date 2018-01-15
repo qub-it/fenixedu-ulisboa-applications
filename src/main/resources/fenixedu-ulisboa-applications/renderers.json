@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "bundles": [
+      "FenixeduULisboaApplicationsResources"
+    ]
+  },
+  "modules": [
+    { "name": "fenixedu-ulisboa-applications", "configFile": "struts-fenixedu-ulisboa-applications.xml" }
+  ]
+}
