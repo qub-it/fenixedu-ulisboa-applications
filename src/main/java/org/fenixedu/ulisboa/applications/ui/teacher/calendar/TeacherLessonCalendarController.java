@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import org.fenixedu.academic.domain.ExecutionCourse;
 import org.fenixedu.academic.domain.ExecutionSemester;
-import org.fenixedu.academic.domain.LessonInstance;
 import org.fenixedu.academic.domain.Shift;
 import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.ulisboa.applications.dto.teacher.shift.calendar.TeacherLessonCalendarParametersBean;
+import org.fenixedu.ulisboa.applications.services.teacher.calendar.TeacherLessonCalendarReport;
 import org.fenixedu.ulisboa.applications.services.teacher.calendar.TeacherLessonCalendarService;
 import org.fenixedu.ulisboa.applications.ui.FenixeduULisboaApplicationsBaseController;
 import org.fenixedu.ulisboa.applications.ui.FenixeduULisboaApplicationsController;
@@ -32,8 +32,8 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
 
     @RequestMapping
     public String home(Model model, RedirectAttributes redirectAttributes) {
-        ExecutionSemester executionSemester = ExecutionSemester.readActualExecutionSemester();
-        TeacherLessonCalendarParametersBean bean = new TeacherLessonCalendarParametersBean();
+        final ExecutionSemester executionSemester = ExecutionSemester.readActualExecutionSemester();
+        final TeacherLessonCalendarParametersBean bean = new TeacherLessonCalendarParametersBean();
         bean.setExecutionSemester(executionSemester);
 
         return home(model, redirectAttributes, bean);
@@ -43,7 +43,7 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
     public String home(Model model, RedirectAttributes redirectAttributes,
             @RequestParam("bean") TeacherLessonCalendarParametersBean bean) {
         setParametersBean(bean, model);
-        setJsonEvents(getJsonLessonInstances(getTeacherLessonInstances(bean)), model);
+        setJsonEvents(getJsonLessonEvents(getTeacherLessonEvents(bean)), model);
         return jspPage("teacherlessoncalendar");
     }
 
@@ -60,26 +60,25 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
         model.addAttribute("events", events);
     }
 
-    private String getJsonLessonInstances(Collection<LessonInstance> collection) {
+    private String getJsonLessonEvents(Collection<TeacherLessonCalendarReport> collection) {
 
-        JsonArray result = new JsonArray();
+        final JsonArray result = new JsonArray();
 
-        for (LessonInstance lessonInstance : collection) {
-            JsonObject event = new JsonObject();
+        for (final TeacherLessonCalendarReport lessonEventReport : collection) {
+            final JsonObject event = new JsonObject();
 
-            event.addProperty("id", lessonInstance.getExternalId());
-            event.addProperty("start", lessonInstance.getBeginDateTime().toString());
-            event.addProperty("end", lessonInstance.getEndDateTime().toString());
+            event.addProperty("start", lessonEventReport.getEvent().getBegin().toString());
+            event.addProperty("end", lessonEventReport.getEvent().getEnd().toString());
 
-            Shift lessonShift = lessonInstance.getLesson().getShift();
-            JsonObject shiftJSON = new JsonObject();
+            final Shift lessonShift = lessonEventReport.getLesson().getShift();
+            final JsonObject shiftJSON = new JsonObject();
             shiftJSON.addProperty("name", lessonShift.getNome());
             shiftJSON.addProperty("typeInitials", lessonShift.getTypes().iterator().next().getSiglaTipoAula());
             shiftJSON.addProperty("type", lessonShift.getTypes().iterator().next().getFullNameTipoAula());
             event.add("shift", shiftJSON);
 
-            ExecutionCourse lessonExecutionCourse = lessonInstance.getLesson().getExecutionCourse();
-            JsonObject executionCourseJSON = new JsonObject();
+            final ExecutionCourse lessonExecutionCourse = lessonEventReport.getLesson().getExecutionCourse();
+            final JsonObject executionCourseJSON = new JsonObject();
             executionCourseJSON.addProperty("id", lessonExecutionCourse.getExternalId());
             executionCourseJSON.addProperty("name", lessonExecutionCourse.getNameI18N().getContent());
             executionCourseJSON.addProperty("initials", lessonExecutionCourse.getSigla());
@@ -95,13 +94,13 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
         return result.toString();
     }
 
-    private Collection<LessonInstance> getTeacherLessonInstances(final TeacherLessonCalendarParametersBean bean) {
+    private Collection<TeacherLessonCalendarReport> getTeacherLessonEvents(final TeacherLessonCalendarParametersBean bean) {
 
-        ExecutionSemester currentExecutionSemester = bean.getExecutionSemester();
-        Teacher currentTeacher = Authenticate.getUser().getPerson().getTeacher();
+        final ExecutionSemester currentExecutionSemester = bean.getExecutionSemester();
+        final Teacher currentTeacher = Authenticate.getUser().getPerson().getTeacher();
 
-        TeacherLessonCalendarService service = new TeacherLessonCalendarService(currentTeacher, currentExecutionSemester);
+        final TeacherLessonCalendarService service = new TeacherLessonCalendarService(currentTeacher, currentExecutionSemester);
 
-        return service.getLessonInstances();
+        return service.getLessonEvents();
     }
 }
