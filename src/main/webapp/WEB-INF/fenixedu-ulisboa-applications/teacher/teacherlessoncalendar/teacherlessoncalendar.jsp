@@ -82,24 +82,26 @@
 </div>
 
 <%-- FORM --%>
-<form method="post" class="form-horizontal" id="paramsForm"
-	  name="form" ng-app="teacherLessonCalendarApp"
-	  ng-controller="TeacherLessonCalendarController" novalidate>
-
-	<input name="bean" type="hidden" value="{{ object }}"/>
-
-	<div class="form-group row">
-		<div class="col-sm-1 control-label">
-			<spring:message code="label.org.fenixedu.ulisboa.applications.teacher.teacherLessonCalendar.semester"/>
+<c:if test="${showForm}">
+	<form method="post" class="form-horizontal" id="paramsForm"
+		  name="form" ng-app="teacherLessonCalendarApp"
+		  ng-controller="TeacherLessonCalendarController" novalidate>
+	
+		<input name="bean" type="hidden" value="{{ object }}"/>
+	
+		<div class="form-group row">
+			<div class="col-sm-1 control-label">
+				<spring:message code="label.org.fenixedu.ulisboa.applications.teacher.teacherLessonCalendar.semester"/>
+			</div>
+			<div class="col-sm-6">
+				<select id="executionSemesterSelect" class="form-control" ng-change="onBeanChange()"
+						ng-model="object.executionSemester"
+						ng-options="executionSemester.id as executionSemester.text for executionSemester in object.executionSemestersDataSource">
+				</select>
+			</div>
 		</div>
-		<div class="col-sm-6">
-			<select id="executionSemesterSelect" class="form-control" ng-change="onBeanChange()"
-					ng-model="object.executionSemester"
-					ng-options="executionSemester.id as executionSemester.text for executionSemester in object.executionSemestersDataSource">
-			</select>
-		</div>
-	</div>
-</form>
+	</form>
+</c:if>
 
 <div id="calendar"></div>
 
@@ -234,6 +236,8 @@
         function renderAgendaWeekEvent(event, element) {
             var title = urlEvent(event.executionCourse.initials, event.executionCourse.url) + "<br/>" +
                         event.shift.name + " - " + event.shift.typeInitials;
+            if (event.space)
+            	title = title + " (" + event.space.name + ")";
             element.find('.fc-title').replaceWith(title);
             element.find('.fc-content').css('padding', '2px 0 0 2px');
             element.find('.fc-time').css("white-space", "normal");
@@ -246,6 +250,8 @@
                 "",
                 event.executionCourse.code + " - " + urlEvent(event.executionCourse.name, event.executionCourse.url),
                 event.shift.name + " - " + event.shift.type].join("<br/>");
+            if (event.space)
+            	title = title + "<br />" + event.space.presentationName;
 
             element.find('.fc-title').replaceWith(title);
         }
@@ -254,6 +260,8 @@
             var title = event.executionCourse.code + " - " +
                         urlEvent(event.executionCourse.name, event.executionCourse.url) + " (" + event.shift.name +
                         " - " + event.shift.type + ")";
+            if (event.space)
+            	title = title + " (" + event.space.presentationName + ")";
             element.find(".fc-list-item-title a").replaceWith(title);
         }
 
@@ -264,7 +272,7 @@
         function eventPopoverConfig(event) {
             return {
                 content: "<div>" + event.executionCourse.code + " - " + event.executionCourse.name + "</div>" + "<hr>" +
-                         "<div>" + event.shift.type + "</div>",
+                         "<div>" + event.shift.type + (event.space ? "<br />" + event.space.presentationName : "") + "</div>",
                 html: 'true',
                 trigger: 'hover',
                 placement: 'top',
