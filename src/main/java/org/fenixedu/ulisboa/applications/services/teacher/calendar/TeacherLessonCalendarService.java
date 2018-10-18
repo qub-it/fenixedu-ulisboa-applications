@@ -13,7 +13,7 @@ public class TeacherLessonCalendarService {
     private final ExecutionSemester executionSemester;
     private final Teacher teacher;
 
-    public TeacherLessonCalendarService(Teacher teacher, ExecutionSemester executionSemester) {
+    public TeacherLessonCalendarService(ExecutionSemester executionSemester, Teacher teacher) {
         this.teacher = teacher;
         this.executionSemester = executionSemester;
     }
@@ -24,7 +24,7 @@ public class TeacherLessonCalendarService {
 
     private Collection<TeacherLessonCalendarReport> buildSearchUniverse() {
 
-        if (teacher == null || executionSemester == null) {
+        if (executionSemester == null || teacher == null) {
             return Sets.newHashSet();
         }
 

@@ -7,6 +7,8 @@ import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.ulisboa.applications.dto.teacher.shift.calendar.TeacherLessonCalendarParametersBean;
+import org.fenixedu.ulisboa.applications.dto.teacher.shift.calendar.TeacherLessonCalendarParametersBean.ExecutionSemesterProviderType;
+import org.fenixedu.ulisboa.applications.dto.teacher.shift.calendar.TeacherLessonCalendarParametersBean.TeacherProviderType;
 import org.fenixedu.ulisboa.applications.services.teacher.calendar.TeacherLessonCalendarReport;
 import org.fenixedu.ulisboa.applications.services.teacher.calendar.TeacherLessonCalendarService;
 import org.fenixedu.ulisboa.applications.ui.FenixeduULisboaApplicationsBaseController;
@@ -26,10 +28,15 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
     public static final String CONTROLLER_URL = "/fenixedu-ulisboa-applications/teacher/teacherlessoncalendar";
     private static final String JSP_PATH = CONTROLLER_URL.substring(1);
 
+    private static final ExecutionSemesterProviderType EXECUTION_SEMESTER_PROVIDER_TYPE =
+            ExecutionSemesterProviderType.CURRENT_EXECUTION_YEAR;
+    private static final TeacherProviderType TEACHER_PROVIDER_TYPE = TeacherProviderType.CURRENT_AUTHENTICATED_TEACHER;
+
     @RequestMapping
     public String home(Model model, RedirectAttributes redirectAttributes) {
         final ExecutionSemester executionSemester = ExecutionSemester.readActualExecutionSemester();
-        final TeacherLessonCalendarParametersBean bean = new TeacherLessonCalendarParametersBean();
+        final TeacherLessonCalendarParametersBean bean =
+                new TeacherLessonCalendarParametersBean(EXECUTION_SEMESTER_PROVIDER_TYPE, TEACHER_PROVIDER_TYPE);
         bean.setExecutionSemester(executionSemester);
 
         return home(model, redirectAttributes, bean);
@@ -38,10 +45,14 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
     @RequestMapping(method = RequestMethod.POST)
     public String home(Model model, RedirectAttributes redirectAttributes,
             @RequestParam("bean") TeacherLessonCalendarParametersBean bean) {
+        bean.setTeacher(Authenticate.getUser().getPerson().getTeacher());
+        bean.updateData(EXECUTION_SEMESTER_PROVIDER_TYPE, TEACHER_PROVIDER_TYPE);
         setParametersBean(bean, model);
         setJsonEvents(TeacherLessonCalendarUtil.getJsonLessonEvents(getTeacherLessonEvents(bean)), model);
 
-        model.addAttribute("showForm", true);
+        model.addAttribute("showTeacherSelector", false);
+
+        model.addAttribute("controllerUrl", CONTROLLER_URL);
 
         return jspPage("teacherlessoncalendar");
     }
@@ -62,9 +73,9 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
     private Collection<TeacherLessonCalendarReport> getTeacherLessonEvents(final TeacherLessonCalendarParametersBean bean) {
 
         final ExecutionSemester currentExecutionSemester = bean.getExecutionSemester();
-        final Teacher currentTeacher = Authenticate.getUser().getPerson().getTeacher();
+        final Teacher currentTeacher = bean.getTeacher();
 
-        final TeacherLessonCalendarService service = new TeacherLessonCalendarService(currentTeacher, currentExecutionSemester);
+        final TeacherLessonCalendarService service = new TeacherLessonCalendarService(currentExecutionSemester, currentTeacher);
 
         return service.getLessonEvents();
     }

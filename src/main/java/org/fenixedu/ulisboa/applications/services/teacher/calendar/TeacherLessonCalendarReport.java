@@ -8,7 +8,7 @@ import org.fenixedu.academic.domain.util.icalendar.EventBean;
 public class TeacherLessonCalendarReport {
 
     public static final Comparator<TeacherLessonCalendarReport> COMPARATOR_BY_BEGIN =
-            (x, y) -> x.getEvent().getBegin().compareTo(y.getEvent().getEnd());
+            Comparator.comparing(x -> x.getEvent().getBegin());
 
     private final Lesson lesson;
 
