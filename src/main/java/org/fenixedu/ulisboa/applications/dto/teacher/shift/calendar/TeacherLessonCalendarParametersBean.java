@@ -52,7 +52,7 @@ public class TeacherLessonCalendarParametersBean implements IBean {
         switch (teacherProviderType) {
         case INCLUDE_ALL_WITH_AUTHORIZATION:
             if (this.executionSemester != null) {
-                this.teachersDataSource = this.executionSemester.getTeacherAuthorizationStream().map(ta -> ta.getTeacher())
+                this.teachersDataSource = this.executionSemester.getTeacherAuthorizationSet().stream().map(ta -> ta.getTeacher())
                         .distinct().map(t -> new TupleDataSourceBean(t.getExternalId(), t.getPerson().getDisplayName()))
                         .sorted(TupleDataSourceBean.COMPARE_BY_TEXT).collect(Collectors.toList());
             }
