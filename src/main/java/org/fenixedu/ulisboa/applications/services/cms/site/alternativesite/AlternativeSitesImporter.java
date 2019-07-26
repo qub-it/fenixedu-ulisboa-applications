@@ -189,7 +189,7 @@ public class AlternativeSitesImporter {
         String competenceCourseCode = getCellValueAsString(row, row.getCell(COLUMN_COMPETENCE_COURSE_CODE), result);
         if (competenceCourseCode != null) {
             Optional<ExecutionCourse> executionCourseOptional =
-                    degreeCurricularPlan.getExecutionCoursesByExecutionPeriod(executionSemester).stream()
+                    degreeCurricularPlan.getExecutionCourses(executionSemester).stream()
                             .filter(ec -> Objects.equals(ec.getCode(), competenceCourseCode)).findFirst();
 
             if (!executionCourseOptional.isPresent()) {
