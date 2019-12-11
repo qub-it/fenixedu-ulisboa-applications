@@ -2,7 +2,7 @@ package org.fenixedu.ulisboa.applications.ui.teacher.calendar;
 
 import java.util.Collection;
 
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -34,10 +34,10 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
 
     @RequestMapping
     public String home(Model model, RedirectAttributes redirectAttributes) {
-        final ExecutionSemester executionSemester = ExecutionSemester.readActualExecutionSemester();
+        final ExecutionInterval executionInterval = ExecutionInterval.findFirstCurrentChild(null);
         final TeacherLessonCalendarParametersBean bean =
                 new TeacherLessonCalendarParametersBean(EXECUTION_SEMESTER_PROVIDER_TYPE, TEACHER_PROVIDER_TYPE);
-        bean.setExecutionSemester(executionSemester);
+        bean.setExecutionSemester(executionInterval);
 
         return home(model, redirectAttributes, bean);
     }
@@ -72,7 +72,7 @@ public class TeacherLessonCalendarController extends FenixeduULisboaApplications
 
     private Collection<TeacherLessonCalendarReport> getTeacherLessonEvents(final TeacherLessonCalendarParametersBean bean) {
 
-        final ExecutionSemester currentExecutionSemester = bean.getExecutionSemester();
+        final ExecutionInterval currentExecutionSemester = bean.getExecutionSemester();
         final Teacher currentTeacher = bean.getTeacher();
 
         final TeacherLessonCalendarService service = new TeacherLessonCalendarService(currentExecutionSemester, currentTeacher);

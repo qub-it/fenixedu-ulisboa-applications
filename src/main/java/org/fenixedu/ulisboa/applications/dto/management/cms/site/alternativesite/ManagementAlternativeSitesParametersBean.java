@@ -3,14 +3,14 @@ package org.fenixedu.ulisboa.applications.dto.management.cms.site.alternativesit
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.bennu.IBean;
 import org.fenixedu.bennu.TupleDataSourceBean;
 import org.fenixedu.bennu.core.domain.Bennu;
 
 public class ManagementAlternativeSitesParametersBean implements IBean {
 
-    private ExecutionSemester executionSemester;
+    private ExecutionInterval executionSemester;
 
     private List<TupleDataSourceBean> executionSemestersDataSource;
 
@@ -26,16 +26,16 @@ public class ManagementAlternativeSitesParametersBean implements IBean {
 
     private void updateExecutionSemestersDataSource() {
         this.executionSemestersDataSource = Bennu.getInstance().getExecutionPeriodsSet().stream()
-                .sorted(ExecutionSemester.COMPARATOR_BY_BEGIN_DATE.reversed())
+                .sorted(ExecutionInterval.COMPARATOR_BY_BEGIN_DATE.reversed())
                 .map(x -> new TupleDataSourceBean(x.getExternalId(), x.getQualifiedName())).collect(Collectors.toList());
     }
 
-    public ExecutionSemester getExecutionSemester() {
+    public ExecutionInterval getExecutionSemester() {
         return executionSemester;
     }
 
-    public void setExecutionSemester(ExecutionSemester executionSemester) {
-        this.executionSemester = executionSemester;
+    public void setExecutionSemester(ExecutionInterval executionInterval) {
+        this.executionSemester = executionInterval;
     }
 
     public List<TupleDataSourceBean> getExecutionSemestersDataSource() {

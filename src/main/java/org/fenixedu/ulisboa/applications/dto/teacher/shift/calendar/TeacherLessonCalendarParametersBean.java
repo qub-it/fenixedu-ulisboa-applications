@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.bennu.IBean;
@@ -14,7 +14,7 @@ import org.fenixedu.bennu.core.security.Authenticate;
 
 public class TeacherLessonCalendarParametersBean implements IBean {
 
-    private ExecutionSemester executionSemester;
+    private ExecutionInterval executionSemester;
     private Teacher teacher;
 
     private List<TupleDataSourceBean> executionSemestersDataSource;
@@ -37,7 +37,7 @@ public class TeacherLessonCalendarParametersBean implements IBean {
         switch (executionSemesterProviderType) {
         case INCLUDE_ALL:
             this.executionSemestersDataSource = Bennu.getInstance().getExecutionPeriodsSet().stream()
-                    .sorted(ExecutionSemester.COMPARATOR_BY_BEGIN_DATE.reversed())
+                    .sorted(ExecutionInterval.COMPARATOR_BY_BEGIN_DATE.reversed())
                     .map(x -> new TupleDataSourceBean(x.getExternalId(), x.getQualifiedName())).collect(Collectors.toList());
             break;
 
@@ -71,11 +71,11 @@ public class TeacherLessonCalendarParametersBean implements IBean {
         }
     }
 
-    public ExecutionSemester getExecutionSemester() {
+    public ExecutionInterval getExecutionSemester() {
         return executionSemester;
     }
 
-    public void setExecutionSemester(ExecutionSemester executionSemester) {
+    public void setExecutionSemester(ExecutionInterval executionSemester) {
         this.executionSemester = executionSemester;
     }
 

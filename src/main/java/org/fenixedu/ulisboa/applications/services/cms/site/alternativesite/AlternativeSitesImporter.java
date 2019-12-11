@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeCurricularPlan;
 import org.fenixedu.academic.domain.ExecutionCourse;
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.fenixedu.ulisboa.applications.util.ULisboaApplicationsUtil;
 import org.springframework.stereotype.Service;
@@ -70,22 +70,22 @@ public class AlternativeSitesImporter {
     }
 
     @Atomic
-    public ProcessResult processFile(File file, ExecutionSemester executionSemester) {
+    public ProcessResult processFile(File file, ExecutionInterval executionInterval) {
         ProcessResult result = new ProcessResult();
 
-        processFile(file, executionSemester, result);
+        processFile(file, executionInterval, result);
 
         return result;
     }
 
-    private void processFile(File file, ExecutionSemester executionSemester, ProcessResult result) {
+    private void processFile(File file, ExecutionInterval executionInterval, ProcessResult result) {
         Workbook wb = null;
 
         try {
             wb = WorkbookFactory.create(file);
 
             final Sheet sheet = wb.getSheetAt(0);
-            processSheet(sheet, executionSemester, result);
+            processSheet(sheet, executionInterval, result);
 
         } catch (final IOException | InvalidFormatException e) {
             e.printStackTrace();
@@ -102,7 +102,7 @@ public class AlternativeSitesImporter {
         }
     }
 
-    private void processSheet(Sheet sheet, ExecutionSemester executionSemester, ProcessResult result) {
+    private void processSheet(Sheet sheet, ExecutionInterval executionInterval, ProcessResult result) {
         Iterator<Row> rowIterator = sheet.rowIterator();
 
         // Skip header row
@@ -110,11 +110,11 @@ public class AlternativeSitesImporter {
 
         while (rowIterator.hasNext()) {
             final Row row = rowIterator.next();
-            processRow(row, executionSemester, result);
+            processRow(row, executionInterval, result);
         }
     }
 
-    private void processRow(Row row, ExecutionSemester executionSemester, ProcessResult result) {
+    private void processRow(Row row, ExecutionInterval executionInterval, ProcessResult result) {
         if (row.getPhysicalNumberOfCells() >= NUMBER_REQUIRED_COLUMS) {
             Degree degree = getDegree(row, result);
             if (degree == null) {
@@ -126,7 +126,7 @@ public class AlternativeSitesImporter {
                 return;
             }
 
-            ExecutionCourse executionCourse = getExecutionCourse(row, degreeCurricularPlan, executionSemester, result);
+            ExecutionCourse executionCourse = getExecutionCourse(row, degreeCurricularPlan, executionInterval, result);
             if (executionCourse == null) {
                 return;
             }
@@ -134,7 +134,7 @@ public class AlternativeSitesImporter {
             if (executionCourse.getSite() == null) {
                 result.addErrorMessage(
                         "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.noSiteConfigured",
-                        String.valueOf(row.getRowNum() + 1), executionSemester.getQualifiedName(), degreeCurricularPlan.getName(),
+                        String.valueOf(row.getRowNum() + 1), executionInterval.getQualifiedName(), degreeCurricularPlan.getName(),
                         executionCourse.getCode());
                 return;
             }
@@ -185,17 +185,17 @@ public class AlternativeSitesImporter {
     }
 
     private ExecutionCourse getExecutionCourse(Row row, DegreeCurricularPlan degreeCurricularPlan,
-            ExecutionSemester executionSemester, ProcessResult result) {
+            ExecutionInterval executionInterval, ProcessResult result) {
         String competenceCourseCode = getCellValueAsString(row, row.getCell(COLUMN_COMPETENCE_COURSE_CODE), result);
         if (competenceCourseCode != null) {
             Optional<ExecutionCourse> executionCourseOptional =
-                    degreeCurricularPlan.getExecutionCourses(executionSemester).stream()
+                    degreeCurricularPlan.getExecutionCourses(executionInterval).stream()
                             .filter(ec -> Objects.equals(ec.getCode(), competenceCourseCode)).findFirst();
 
             if (!executionCourseOptional.isPresent()) {
                 result.addErrorMessage(
                         "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownExecutionCourse",
-                        String.valueOf(row.getRowNum() + 1), executionSemester.getQualifiedName(), degreeCurricularPlan.getName(),
+                        String.valueOf(row.getRowNum() + 1), executionInterval.getQualifiedName(), degreeCurricularPlan.getName(),
                         competenceCourseCode);
                 return null;
             }

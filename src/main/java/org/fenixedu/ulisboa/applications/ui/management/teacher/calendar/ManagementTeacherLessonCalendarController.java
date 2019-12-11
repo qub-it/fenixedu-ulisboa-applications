@@ -2,7 +2,7 @@ package org.fenixedu.ulisboa.applications.ui.management.teacher.calendar;
 
 import java.util.Collection;
 
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.ulisboa.applications.dto.teacher.shift.calendar.TeacherLessonCalendarParametersBean;
@@ -35,10 +35,10 @@ public class ManagementTeacherLessonCalendarController extends FenixeduULisboaAp
 
     @RequestMapping
     public String home(Model model, RedirectAttributes redirectAttributes) {
-        final ExecutionSemester executionSemester = ExecutionSemester.readActualExecutionSemester();
+        final ExecutionInterval executionInterval = ExecutionInterval.findFirstCurrentChild(null);
         final TeacherLessonCalendarParametersBean bean =
                 new TeacherLessonCalendarParametersBean(EXECUTION_SEMESTER_PROVIDER_TYPE, TEACHER_PROVIDER_TYPE);
-        bean.setExecutionSemester(executionSemester);
+        bean.setExecutionSemester(executionInterval);
 
         return home(model, redirectAttributes, bean);
     }
@@ -72,7 +72,7 @@ public class ManagementTeacherLessonCalendarController extends FenixeduULisboaAp
 
     private Collection<TeacherLessonCalendarReport> getTeacherLessonEvents(final TeacherLessonCalendarParametersBean bean) {
 
-        final ExecutionSemester currentExecutionSemester = bean.getExecutionSemester();
+        final ExecutionInterval currentExecutionSemester = bean.getExecutionSemester();
         final Teacher currentTeacher = bean.getTeacher();
 
         final TeacherLessonCalendarService service = new TeacherLessonCalendarService(currentExecutionSemester, currentTeacher);

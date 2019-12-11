@@ -3,7 +3,7 @@ package org.fenixedu.ulisboa.applications.ui.management.cms.site.alternativesite
 import java.io.File;
 import java.io.IOException;
 
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.ulisboa.applications.dto.management.cms.site.alternativesite.ManagementAlternativeSitesParametersBean;
 import org.fenixedu.ulisboa.applications.services.cms.site.alternativesite.AlternativeSitesImporter;
@@ -33,9 +33,9 @@ public class ManagementAlternativeSiteController extends FenixeduULisboaApplicat
 
     @RequestMapping
     public String home(Model model, RedirectAttributes redirectAttributes) {
-        final ExecutionSemester executionSemester = ExecutionSemester.readActualExecutionSemester();
+        final ExecutionInterval executionInterval = ExecutionInterval.findFirstCurrentChild(null);
         final ManagementAlternativeSitesParametersBean bean = new ManagementAlternativeSitesParametersBean();
-        bean.setExecutionSemester(executionSemester);
+        bean.setExecutionSemester(executionInterval);
 
         return manage(model, redirectAttributes, bean);
     }

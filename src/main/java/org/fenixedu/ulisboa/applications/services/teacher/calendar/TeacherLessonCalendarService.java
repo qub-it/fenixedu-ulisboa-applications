@@ -3,19 +3,19 @@ package org.fenixedu.ulisboa.applications.services.teacher.calendar;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.academic.domain.Teacher;
 
 import com.google.common.collect.Sets;
 
 public class TeacherLessonCalendarService {
 
-    private final ExecutionSemester executionSemester;
+    private final ExecutionInterval executionSemester;
     private final Teacher teacher;
 
-    public TeacherLessonCalendarService(ExecutionSemester executionSemester, Teacher teacher) {
+    public TeacherLessonCalendarService(ExecutionInterval executionInterval, Teacher teacher) {
         this.teacher = teacher;
-        this.executionSemester = executionSemester;
+        this.executionSemester = executionInterval;
     }
 
     public Collection<TeacherLessonCalendarReport> getLessonEvents() {
