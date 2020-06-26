@@ -29,7 +29,7 @@
 			<dependency>
 				<groupId>com.qubit.solution.fenixedu.ulisboa</groupId>
 				<artifactId>fenixedu-ulisboa-dependency-management</artifactId>
-				<version>201</version>
+				<version>202</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
