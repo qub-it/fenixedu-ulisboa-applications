@@ -172,7 +172,7 @@ public class AlternativeSitesImporter {
         String degreeCurricularPlanName = getCellValueAsString(row, row.getCell(COLUMN_DEGREE_CURRICULAR_PLAN_NAME), result);
         if (degreeCurricularPlanName != null) {
             DegreeCurricularPlan degreeCurricularPlan =
-                    degree.findDegreeCurricularPlan(new LocalizedString(Locale.getDefault(), degreeCurricularPlanName));
+                    findDegreeCurricularPlan(degree, new LocalizedString(Locale.getDefault(), degreeCurricularPlanName));
             if (degreeCurricularPlan == null) {
                 result.addErrorMessage(
                         "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownDegreeCurricularPlan",
@@ -180,6 +180,16 @@ public class AlternativeSitesImporter {
                 return null;
             }
             return degreeCurricularPlan;
+        }
+        return null;
+    }
+
+    private static DegreeCurricularPlan findDegreeCurricularPlan(final Degree degree, final LocalizedString name) {
+        String dcpName = name.getContent(Locale.getDefault());
+        for (DegreeCurricularPlan dcp : degree.getDegreeCurricularPlansSet()) {
+            if (dcp.getName().equalsIgnoreCase(dcpName)) {
+                return dcp;
+            }
         }
         return null;
     }
