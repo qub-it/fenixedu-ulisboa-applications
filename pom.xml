@@ -22,14 +22,14 @@
 			<dependency>
 				<groupId>com.qubit.solution.fenixedu</groupId>
 				<artifactId>fenixedu-dependency-management</artifactId>
-				<version>910</version>
+				<version>912</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>com.qubit.solution.fenixedu.ulisboa</groupId>
 				<artifactId>fenixedu-ulisboa-dependency-management</artifactId>
-				<version>347</version>
+				<version>350</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
