@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.qubit.solution.fenixedu.build</groupId>
 		<artifactId>qub-fenixedu-project</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1</version>
 	</parent>
 
 	<groupId>org.fenixedu</groupId>
@@ -22,14 +22,14 @@
 			<dependency>
 				<groupId>com.qubit.solution.fenixedu</groupId>
 				<artifactId>fenixedu-dependency-management</artifactId>
-				<version>1012</version>
+				<version>1015</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>com.qubit.solution.fenixedu.ulisboa</groupId>
 				<artifactId>fenixedu-ulisboa-dependency-management</artifactId>
-				<version>373</version>
+				<version>375</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
