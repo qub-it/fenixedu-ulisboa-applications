@@ -22,7 +22,7 @@
 			<dependency>
 				<groupId>com.qubit.solution.fenixedu</groupId>
 				<artifactId>fenixedu-dependency-management</artifactId>
-				<version>1908</version>
+				<version>1909</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
