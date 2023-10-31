@@ -1,3 +1,5 @@
+- Refactor: Replacing uses of Strings from repackage google commons for StringUtils from commons-lang3 [#qubIT-Fenix-4501]
+
 2.5.1 (06-07-2023)
 - Refactor: Make compatible with latest version of academic-core
 

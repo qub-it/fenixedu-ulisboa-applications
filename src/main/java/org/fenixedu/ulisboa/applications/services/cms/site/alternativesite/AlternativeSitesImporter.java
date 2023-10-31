@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -22,8 +23,6 @@ import org.fenixedu.academic.domain.ExecutionInterval;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.fenixedu.ulisboa.applications.util.ULisboaApplicationsUtil;
 import org.springframework.stereotype.Service;
-
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -141,7 +140,8 @@ public class AlternativeSitesImporter {
 
             String alternativeSiteLink =
                     row.getCell(COLUMN_ALTERNATIVE_SITE_LINK, Row.CREATE_NULL_AS_BLANK).getStringCellValue().trim();
-            if (Strings.isNullOrEmpty(alternativeSiteLink)) {
+
+            if (StringUtils.isEmpty(alternativeSiteLink)) {
                 alternativeSiteLink = null;
             }
 
