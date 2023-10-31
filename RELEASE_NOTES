@@ -1,3 +1,4 @@
+2.5.2 (31-10-2023)
 - Refactor: Replacing uses of Strings from repackage google commons for StringUtils from commons-lang3 [#qubIT-Fenix-4501]
 
 2.5.1 (06-07-2023)
