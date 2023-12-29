@@ -24,9 +24,9 @@ public class TeacherLessonCalendarUtil {
 
             final Shift lessonShift = lessonEventReport.getLesson().getShift();
             final JsonObject shiftJSON = new JsonObject();
-            shiftJSON.addProperty("name", lessonShift.getNome());
-            shiftJSON.addProperty("typeInitials", lessonShift.getTypes().iterator().next().getSiglaTipoAula());
-            shiftJSON.addProperty("type", lessonShift.getTypes().iterator().next().getFullNameTipoAula());
+            shiftJSON.addProperty("name", lessonShift.getName());
+            shiftJSON.addProperty("typeInitials", lessonShift.getCourseLoadType().getInitials().getContent());
+            shiftJSON.addProperty("type", lessonShift.getCourseLoadType().getName().getContent());
             event.add("shift", shiftJSON);
 
             final ExecutionCourse lessonExecutionCourse = lessonEventReport.getLesson().getExecutionCourse();
@@ -47,7 +47,7 @@ public class TeacherLessonCalendarUtil {
             }
 
             event.addProperty("title", lessonExecutionCourse.getSigla() + " (" + lessonExecutionCourse.getCode() + " - "
-                    + lessonShift.getNome() + " " + lessonShift.getTypes().iterator().next().getSiglaTipoAula() + ")");
+                    + lessonShift.getName() + " " + lessonShift.getCourseLoadType().getName().getContent() + ")");
 
             result.add(event);
         }
