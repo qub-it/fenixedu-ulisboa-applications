@@ -7,8 +7,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.qubit.qubEdu.module.base.util.SheetProcessor;
-import com.qubit.qubEdu.module.base.util.XLSxUtil;
+import com.qubit.terra.framework.tools.excel.ExcelUtil;
+import com.qubit.terra.framework.tools.excel.SheetProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -177,7 +177,7 @@ public class AlternativeSitesImporter {
     }
     private void processFile(File file, ExecutionInterval executionInterval, ProcessResult result) {
         try {
-            XLSxUtil.importExcel(file, new ExecutionIntervalSheetProcessor(result, executionInterval));
+            ExcelUtil.importExcel(file, new ExecutionIntervalSheetProcessor(result, executionInterval));
         } catch (Throwable t) {
             result.reportFailure();
         }
@@ -198,7 +198,7 @@ public class AlternativeSitesImporter {
     private static String getCellValueAsString(Row row, Cell cell, ProcessResult result) {
         String value = null;
         try {
-            value = XLSxUtil.getCellValueAsString(row, cell.getColumnIndex());
+            value = ExcelUtil.getCellValueAsString(row, cell.getColumnIndex());
         } catch (Throwable t) {
             result.addErrorMessage(
                     "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.invalidCell",
