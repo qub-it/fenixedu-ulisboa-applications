@@ -1,21 +1,17 @@
 package org.fenixedu.ulisboa.applications.services.cms.site.alternativesite;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.qubit.terra.framework.tools.excel.ExcelUtil;
+import com.qubit.terra.framework.tools.excel.SheetProcessor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeCurricularPlan;
 import org.fenixedu.academic.domain.ExecutionCourse;
@@ -77,111 +73,114 @@ public class AlternativeSitesImporter {
         return result;
     }
 
-    private void processFile(File file, ExecutionInterval executionInterval, ProcessResult result) {
-        Workbook wb = null;
+    private static class ExecutionIntervalSheetProcessor extends SheetProcessor {
+        ProcessResult result;
+        ExecutionInterval executionInterval;
 
-        try {
-            wb = WorkbookFactory.create(file);
 
-            final Sheet sheet = wb.getSheetAt(0);
-            processSheet(sheet, executionInterval, result);
+        public ExecutionIntervalSheetProcessor(ProcessResult processResult, ExecutionInterval executionInterval) {
+            super();
+            this.result = processResult;
+            this.executionInterval = executionInterval;
+            setRowProcessor(row -> {
+                if (row.getPhysicalNumberOfCells() >= NUMBER_REQUIRED_COLUMS) {
+                    Degree degree = getDegree(row, result);
+                    if (degree == null) {
+                        return;
+                    }
 
-        } catch (final IOException | InvalidFormatException e) {
-            e.printStackTrace();
-            result.reportFailure();
-        } finally {
-            if (wb != null) {
-                try {
-                    wb.close();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                    result.reportFailure();
+                    DegreeCurricularPlan degreeCurricularPlan = getDegreeCurricularPlan(row, degree, this.result);
+                    if (degreeCurricularPlan == null) {
+                        return;
+                    }
+
+                    ExecutionCourse executionCourse = getExecutionCourse(row, degreeCurricularPlan, this.executionInterval, this.result);
+                    if (executionCourse == null) {
+                        return;
+                    }
+
+                    if (executionCourse.getSite() == null) {
+                        this.result.addErrorMessage(
+                                "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.noSiteConfigured",
+                                String.valueOf(row.getRowNum() + 1), this.executionInterval.getQualifiedName(), degreeCurricularPlan.getName(),
+                                executionCourse.getCode());
+                        return;
+                    }
+
+                    String alternativeSiteLink =
+                            row.getCell(COLUMN_ALTERNATIVE_SITE_LINK, Row.CREATE_NULL_AS_BLANK).getStringCellValue().trim();
+
+                    if (StringUtils.isEmpty(alternativeSiteLink)) {
+                        alternativeSiteLink = null;
+                    }
+
+                    executionCourse.getSite().setAlternativeSite(alternativeSiteLink);
+                } else {
+                    this.result.addErrorMessage(
+                            "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.invalidLine",
+                            String.valueOf(row.getRowNum() + 1));
                 }
+            });
+
+        }
+
+        private ExecutionCourse getExecutionCourse(Row row, DegreeCurricularPlan degreeCurricularPlan,
+                                                          ExecutionInterval executionInterval, ProcessResult result) {
+            String competenceCourseCode = getCellValueAsString(row, row.getCell(COLUMN_COMPETENCE_COURSE_CODE), result);
+            if (competenceCourseCode != null) {
+                Optional<ExecutionCourse> executionCourseOptional =
+                        degreeCurricularPlan.getExecutionCourses(executionInterval).stream()
+                                .filter(ec -> Objects.equals(ec.getCode(), competenceCourseCode)).findFirst();
+
+                if (!executionCourseOptional.isPresent()) {
+                    result.addErrorMessage(
+                            "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownExecutionCourse",
+                            String.valueOf(row.getRowNum() + 1), executionInterval.getQualifiedName(), degreeCurricularPlan.getName(),
+                            competenceCourseCode);
+                    return null;
+                }
+                return executionCourseOptional.get();
             }
+            return null;
+        }
+
+        private DegreeCurricularPlan getDegreeCurricularPlan(Row row, Degree degree, ProcessResult result) {
+            String degreeCurricularPlanName = getCellValueAsString(row, row.getCell(COLUMN_DEGREE_CURRICULAR_PLAN_NAME), result);
+            if (degreeCurricularPlanName != null) {
+                DegreeCurricularPlan degreeCurricularPlan =
+                        findDegreeCurricularPlan(degree, new LocalizedString(Locale.getDefault(), degreeCurricularPlanName));
+                if (degreeCurricularPlan == null) {
+                    result.addErrorMessage(
+                            "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownDegreeCurricularPlan",
+                            String.valueOf(row.getRowNum() + 1), degree.getPresentationName(), degreeCurricularPlanName);
+                    return null;
+                }
+                return degreeCurricularPlan;
+            }
+            return null;
+        }
+
+        private Degree getDegree(Row row, ProcessResult result) {
+            String degreeCode = getCellValueAsString(row, row.getCell(COLUMN_DEGREE_CODE), result);
+            if (degreeCode != null) {
+                Degree degree = Degree.find(degreeCode);
+                if (degree == null) {
+                    result.addErrorMessage(
+                            "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownDegree",
+                            String.valueOf(row.getRowNum() + 1), degreeCode);
+                    return null;
+                }
+                return degree;
+            }
+            return null;
         }
     }
-
-    private void processSheet(Sheet sheet, ExecutionInterval executionInterval, ProcessResult result) {
-        Iterator<Row> rowIterator = sheet.rowIterator();
-
-        // Skip header row
-        rowIterator.next();
-
-        while (rowIterator.hasNext()) {
-            final Row row = rowIterator.next();
-            processRow(row, executionInterval, result);
+    private void processFile(File file, ExecutionInterval executionInterval, ProcessResult result) {
+        try {
+            ExcelUtil.importExcel(file, new ExecutionIntervalSheetProcessor(result, executionInterval));
+        } catch (Throwable t) {
+            result.reportFailure();
         }
-    }
-
-    private void processRow(Row row, ExecutionInterval executionInterval, ProcessResult result) {
-        if (row.getPhysicalNumberOfCells() >= NUMBER_REQUIRED_COLUMS) {
-            Degree degree = getDegree(row, result);
-            if (degree == null) {
-                return;
-            }
-
-            DegreeCurricularPlan degreeCurricularPlan = getDegreeCurricularPlan(row, degree, result);
-            if (degreeCurricularPlan == null) {
-                return;
-            }
-
-            ExecutionCourse executionCourse = getExecutionCourse(row, degreeCurricularPlan, executionInterval, result);
-            if (executionCourse == null) {
-                return;
-            }
-
-            if (executionCourse.getSite() == null) {
-                result.addErrorMessage(
-                        "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.noSiteConfigured",
-                        String.valueOf(row.getRowNum() + 1), executionInterval.getQualifiedName(), degreeCurricularPlan.getName(),
-                        executionCourse.getCode());
-                return;
-            }
-
-            String alternativeSiteLink =
-                    row.getCell(COLUMN_ALTERNATIVE_SITE_LINK, Row.CREATE_NULL_AS_BLANK).getStringCellValue().trim();
-
-            if (StringUtils.isEmpty(alternativeSiteLink)) {
-                alternativeSiteLink = null;
-            }
-
-            executionCourse.getSite().setAlternativeSite(alternativeSiteLink);
-        } else {
-            result.addErrorMessage(
-                    "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.invalidLine",
-                    String.valueOf(row.getRowNum() + 1));
-        }
-    }
-
-    private Degree getDegree(Row row, ProcessResult result) {
-        String degreeCode = getCellValueAsString(row, row.getCell(COLUMN_DEGREE_CODE), result);
-        if (degreeCode != null) {
-            Degree degree = Degree.find(degreeCode);
-            if (degree == null) {
-                result.addErrorMessage(
-                        "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownDegree",
-                        String.valueOf(row.getRowNum() + 1), degreeCode);
-                return null;
-            }
-            return degree;
-        }
-        return null;
-    }
-
-    private DegreeCurricularPlan getDegreeCurricularPlan(Row row, Degree degree, ProcessResult result) {
-        String degreeCurricularPlanName = getCellValueAsString(row, row.getCell(COLUMN_DEGREE_CURRICULAR_PLAN_NAME), result);
-        if (degreeCurricularPlanName != null) {
-            DegreeCurricularPlan degreeCurricularPlan =
-                    findDegreeCurricularPlan(degree, new LocalizedString(Locale.getDefault(), degreeCurricularPlanName));
-            if (degreeCurricularPlan == null) {
-                result.addErrorMessage(
-                        "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownDegreeCurricularPlan",
-                        String.valueOf(row.getRowNum() + 1), degree.getPresentationName(), degreeCurricularPlanName);
-                return null;
-            }
-            return degreeCurricularPlan;
-        }
-        return null;
     }
 
     private static DegreeCurricularPlan findDegreeCurricularPlan(final Degree degree, final LocalizedString name) {
@@ -194,37 +193,18 @@ public class AlternativeSitesImporter {
         return null;
     }
 
-    private ExecutionCourse getExecutionCourse(Row row, DegreeCurricularPlan degreeCurricularPlan,
-            ExecutionInterval executionInterval, ProcessResult result) {
-        String competenceCourseCode = getCellValueAsString(row, row.getCell(COLUMN_COMPETENCE_COURSE_CODE), result);
-        if (competenceCourseCode != null) {
-            Optional<ExecutionCourse> executionCourseOptional =
-                    degreeCurricularPlan.getExecutionCourses(executionInterval).stream()
-                            .filter(ec -> Objects.equals(ec.getCode(), competenceCourseCode)).findFirst();
 
-            if (!executionCourseOptional.isPresent()) {
-                result.addErrorMessage(
-                        "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.unknownExecutionCourse",
-                        String.valueOf(row.getRowNum() + 1), executionInterval.getQualifiedName(), degreeCurricularPlan.getName(),
-                        competenceCourseCode);
-                return null;
-            }
-            return executionCourseOptional.get();
-        }
-        return null;
-    }
 
-    private String getCellValueAsString(Row row, Cell cell, ProcessResult result) {
-        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-            return String.valueOf((int) cell.getNumericCellValue());
-        } else if (cell.getCellType() == Cell.CELL_TYPE_BLANK || cell.getCellType() == Cell.CELL_TYPE_STRING) {
-            return cell.getStringCellValue();
-        } else {
+    private static String getCellValueAsString(Row row, Cell cell, ProcessResult result) {
+        String value = null;
+        try {
+            value = ExcelUtil.getCellValueAsString(row, cell.getColumnIndex());
+        } catch (Throwable t) {
             result.addErrorMessage(
                     "label.org.fenixedu.ulisboa.applications.management.cms.site.alternativesite.process.error.invalidCell",
-                    String.valueOf(row.getRowNum() + 1), String.valueOf(cell.getColumnIndex() + 1));
-            return null;
+                    String.valueOf(row.getRowNum() + 1), String.valueOf(cell.getColumnIndex() + 1), t.getMessage());
         }
+        return value;
     }
 
 }
