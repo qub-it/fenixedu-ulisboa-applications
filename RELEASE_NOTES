@@ -1,3 +1,5 @@
+- Refactor: Removes unnecessary classes ManagementAlternativeSiteController and AlternativeSItesImporter [#qubIT-Omnis-6208]
+
 2.7.0 (01-07-2024)
 - Refactor: Uses ExcelUtil to handle excel files [#qubIT-Omnis-6065]
 
