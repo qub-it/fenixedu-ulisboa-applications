@@ -38,7 +38,7 @@ public class TeacherLessonCalendarUtil {
             executionCourseJSON.addProperty("url", lessonExecutionCourse.getSiteUrl());
             event.add("executionCourse", executionCourseJSON);
 
-            final Space space = lessonEventReport.getLesson().getSala();
+            final Space space = lessonEventReport.getLesson().getSpaces().findAny().orElse(null);
             if (space != null) {
                 final JsonObject spaceJSON = new JsonObject();
                 spaceJSON.addProperty("name", space.getName());
