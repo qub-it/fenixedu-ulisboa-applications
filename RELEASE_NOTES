@@ -1,3 +1,5 @@
+- Refactor: Remove references to deprecated lesson methods [#qubIT-Fenix-9230]
+
 2.8.0 (02-07-2024)
 - Refactor: Removes unnecessary classes ManagementAlternativeSiteController and AlternativeSItesImporter [#qubIT-Omnis-6208]
 
