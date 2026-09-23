@@ -1,3 +1,4 @@
+- Refactor: Migrate from javaee to jakarta [#qubIT-Omnis-10960]
 - Refactor: Remove references to deprecated lesson methods [#qubIT-Fenix-9230]
 
 2.8.0 (02-07-2024)
